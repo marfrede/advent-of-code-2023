@@ -1,20 +1,16 @@
 import { readFileSync } from "fs";
 
-const getLines = (filename: string) => {
-  const file = readFileSync(filename, "utf-8");
-  const lines = file.split("\n");
-  return lines;
-};
+const file = readFileSync("./input.txt", "utf-8");
 
-const main = () => {
-  const lines = getLines("./input.txt");
-  let sum = 0;
-  lines.forEach((line) => {
-    if (line) {
-      sum += 0;
-    }
-  });
-  console.log("sum: ", sum);
-};
+const lines = file.split("\n");
 
-main();
+let sum = 0;
+lines.forEach((line) => {
+  if (line) {
+    const firstDigit = line.match(/(\d)/)?.at(1);
+    const lastDigit = line.match(/(\d)(?!.*\d)/)?.at(1);
+    const number = +`${firstDigit}${lastDigit}`;
+    sum += number;
+  }
+});
+console.log("sum: ", sum);
