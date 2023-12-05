@@ -7,6 +7,7 @@ export class Scratchcard {
     this.numbersPresent = this.readPresentNrs(line);
     this.winningNumbers = this.readWinningNrs(line);
     this.points = this.calcPoints();
+    console.log("this: ", this);
   }
 
   public getPoints() {
@@ -14,13 +15,7 @@ export class Scratchcard {
   }
 
   private calcPoints() {
-    let points = 0;
-    this.numbersPresent.forEach((numberPresent) => {
-      if (this.winningNumbers.includes(numberPresent)) {
-        points = points === 0 ? 1 : points + points;
-      }
-    });
-    return points;
+    return this.numbersPresent.map((nrPres) => this.winningNumbers.includes(nrPres)).filter(Boolean).length;
   }
 
   private readPresentNrs(line: string) {
