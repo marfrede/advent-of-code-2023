@@ -28,25 +28,29 @@ const readLineAsGame = (line: string): Game => {
   return game;
 };
 
-const isGamePossible = (game: Game, bag: Bag): boolean => {
-  for (let handOfGame of game.hands) {
-    if ((handOfGame.red ?? 0) > bag.red || (handOfGame.green ?? 0) > bag.green || (handOfGame.blue ?? 0) > bag.blue) {
-      return false;
-    }
+const getMinimumBag = (game: Game): Bag => {
+  const bag: Bag = { red: 0, green: 0, blue: 0 };
+  for (let hand of game.hands) {
+    bag.red = bag.red > (hand.red ?? 0) ? bag.red : hand.red ?? 0;
+    bag.green = bag.green > (hand.green ?? 0) ? bag.green : hand.green ?? 0;
+    bag.blue = bag.blue > (hand.blue ?? 0) ? bag.blue : hand.blue ?? 0;
   }
-  return true;
+  return bag;
+};
+
+const getPowerOfBag = (bag: Bag): number => {
+  return bag.red * bag.green * bag.blue;
 };
 
 const main = () => {
   const lines = getLines("./input.txt");
-  const bag: Bag = { red: 12, green: 13, blue: 14 };
   let sum = 0;
   lines.forEach((line) => {
     if (line) {
       const game = readLineAsGame(line);
-      if (isGamePossible(game, bag)) {
-        sum += game.id;
-      }
+      const minBag = getMinimumBag(game);
+      const power = getPowerOfBag(minBag);
+      sum += power;
     }
   });
   console.log("sum: ", sum);
