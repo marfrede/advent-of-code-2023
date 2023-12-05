@@ -14,20 +14,26 @@ export class Matrix {
     return this.lines;
   }
 
-  public get(pos: Coord): string {
-    if (!this.isCoordValid(pos)) {
-      console.trace("pos: ", pos);
-      throw new Error("Out of Bounds!");
+  public isNextToSymbol(number: number, posInSameLineAfterNumber: Coord) {
+    const { x: posX, y: posY } = posInSameLineAfterNumber;
+    const len = `${number}`.length;
+    for (let x = posX - len; x < posX; x++) {
+      const surroundingPositions = this.getSurroundingPositions({ x, y: posY });
+      for (let index = 0; index < surroundingPositions.length; index++) {
+        const pos = surroundingPositions[index];
+        if (this.isSymbol(pos)) {
+          return true;
+        }
+      }
     }
-    const { x, y } = pos;
-    return this.lines[y].charAt(x);
+    return false;
   }
 
   public isSymbol(pos: Coord) {
     return this.get(pos).match(/\d|\./) === null;
   }
 
-  public getSurroundingPositions(pos: Coord): Coord[] {
+  private getSurroundingPositions(pos: Coord): Coord[] {
     const { x, y } = pos;
     const above = [
       { x: x - 1, y: y - 1 },
@@ -46,19 +52,13 @@ export class Matrix {
     return [...above, ...leftRight, ...below].filter((pos) => this.isCoordValid(pos));
   }
 
-  public isNextToSymbol(number: number, posInSameLineAfterNumber: Coord) {
-    const { x: posX, y: posY } = posInSameLineAfterNumber;
-    const len = `${number}`.length;
-    for (let x = posX - len; x < posX; x++) {
-      const surroundingPositions = this.getSurroundingPositions({ x, y: posY });
-      for (let index = 0; index < surroundingPositions.length; index++) {
-        const pos = surroundingPositions[index];
-        if (this.isSymbol(pos)) {
-          return true;
-        }
-      }
+  private get(pos: Coord): string {
+    if (!this.isCoordValid(pos)) {
+      console.trace("pos: ", pos);
+      throw new Error("Out of Bounds!");
     }
-    return false;
+    const { x, y } = pos;
+    return this.lines[y].charAt(x);
   }
 
   private isCoordValid(pos: Coord): boolean {
