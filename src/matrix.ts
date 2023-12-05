@@ -14,23 +14,25 @@ export class Matrix {
     return this.lines;
   }
 
-  public isNextToSymbol(number: number, posInSameLineAfterNumber: Coord) {
+  public getAdjacentGears(number: number, posInSameLineAfterNumber: Coord) {
     const { x: posX, y: posY } = posInSameLineAfterNumber;
     const len = `${number}`.length;
+    const gearPositions: Set<string> = new Set<string>();
     for (let x = posX - len; x < posX; x++) {
       const surroundingPositions = this.getSurroundingPositions({ x, y: posY });
       for (let index = 0; index < surroundingPositions.length; index++) {
         const pos = surroundingPositions[index];
-        if (this.isSymbol(pos)) {
-          return true;
+        if (this.isGear(pos)) {
+          gearPositions.add(this.getPosId(pos));
         }
       }
     }
-    return false;
+    return gearPositions;
   }
 
-  public isSymbol(pos: Coord) {
-    return this.get(pos).match(/\d|\./) === null;
+  private isGear(pos: Coord) {
+    const gear = "*";
+    return this.get(pos) === gear;
   }
 
   private getSurroundingPositions(pos: Coord): Coord[] {
@@ -69,5 +71,9 @@ export class Matrix {
       return false;
     }
     return true;
+  }
+
+  private getPosId(pos: Coord) {
+    return `${pos.x}, ${pos.y}`;
   }
 }
