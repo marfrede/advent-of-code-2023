@@ -24,13 +24,6 @@ const createAlmanacMaps = (lines: string[]): AlmanacMap[] => {
   return maps;
 };
 
-const readSeeds = (line: string) => {
-  return line
-    .replace(/seeds:\s+/, "")
-    .split(/\s+/)
-    .map(Number);
-};
-
 const mapSeedToLocation = (maps: AlmanacMap[], seed: number) => {
   let newSrc = seed;
   for (const map of maps) {
@@ -40,21 +33,24 @@ const mapSeedToLocation = (maps: AlmanacMap[], seed: number) => {
   return location;
 };
 
-const mapThroughToLocationsReturnMinLocation = (maps: AlmanacMap[], seeds: number[]) => {
-  let minLocation: number | undefined = undefined;
-  for (const seed of seeds) {
-    const location = mapSeedToLocation(maps, seed);
-    minLocation = minLocation === undefined || location < minLocation ? location : minLocation;
-  }
-  return minLocation;
-};
-
 const main = () => {
   const lines: string[] = getLines("./input.txt");
   const maps: AlmanacMap[] = createAlmanacMaps(lines.slice(1));
-  const seeds: number[] = readSeeds(lines[0]);
+  const seedInPairs = lines[0]
+    .replace(/seeds:\s+/, "")
+    .split(/\s+/)
+    .map(Number);
 
-  const minLocation = mapThroughToLocationsReturnMinLocation(maps, seeds);
+  let minLocation: number | undefined = undefined;
+  for (let ix = 0; ix < seedInPairs.length; ix += 2) {
+    const firstSeed = seedInPairs[ix];
+    const range = seedInPairs[ix + 1];
+    for (let seed = firstSeed; seed < firstSeed + range; seed++) {
+      const location = mapSeedToLocation(maps, seed);
+      minLocation = minLocation === undefined || location < minLocation ? location : minLocation;
+    }
+  }
+
   console.log("minLocation: ", minLocation);
 };
 
