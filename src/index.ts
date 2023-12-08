@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { aaaLine } from "./input-helper";
 
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
@@ -6,29 +7,22 @@ const getLines = (filename: string) => {
   return lines.filter((l) => !!l);
 };
 
-const findStartingNodes = (lines: string[]): string[] => lines.filter((line) => line[2] === "A");
-const allWayPointsEndInZ = (lines: string[]): boolean => lines.every((line) => line[2] === "Z");
-
-const getLefts = (lines: string[]): string[] => lines.map((line) => line.substring(7, 10));
-const getRights = (lines: string[]): string[] => lines.map((line) => line.substring(12, 15));
-const getNextLines = (allLines: string[], waypoints: string[]) => {
-  return waypoints.map((waypoint) => {
-    return allLines.find((line) => line.substring(0, 3) === waypoint) as string;
-  });
-};
+const getLeft = (line: string) => line.match(/\((\w+),/)?.at(1) as string;
+const getRight = (line: string) => line.match(/,\s+(\w+)\)/)?.at(1) as string;
+const getNextLine = (lines: string[], waypoint: string) =>
+  lines.find((line) => line.substring(0, 3) === waypoint) as string;
 
 const main = () => {
-  const allLines = getLines("./input.txt");
-  const instructions = allLines[0];
+  const lines = getLines("./input.txt");
+  const instructions = lines[0];
 
   let i = 0;
-  const beginnings: string[] = findStartingNodes(allLines);
+  const beginning = lines[aaaLine];
 
-  let currentLines: string[] = beginnings;
-  while (allWayPointsEndInZ(currentLines) !== true) {
+  let currentLine = beginning;
+  while (currentLine.substring(0, 3) !== "ZZZ") {
     const goLeft = instructions.charAt(i++ % instructions.length) === "L";
-    currentLines = getNextLines(allLines, goLeft ? getLefts(currentLines) : getRights(currentLines));
-    if (i % 1000000 === 0) console.log("iii: ", i);
+    currentLine = getNextLine(lines, goLeft ? getLeft(currentLine) : getRight(currentLine));
   }
 
   console.log("sum: ", i);
