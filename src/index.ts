@@ -9,10 +9,12 @@ const getLines = (filename: string) => {
 const findStartingNodes = (lines: string[]): string[] => lines.filter((line) => line[2] === "A");
 const allWayPointsEndInZ = (lines: string[]): boolean => lines.every((line) => line[2] === "Z");
 
-const getLefts = (lines: string[]): string[] => lines.map((line) => line.match(/\((\w+),/)?.at(1) as string);
-const getRights = (lines: string[]): string[] => lines.map((line) => line.match(/,\s+(\w+)\)/)?.at(1) as string);
+const getLefts = (lines: string[]): string[] => lines.map((line) => line.substring(7, 10));
+const getRights = (lines: string[]): string[] => lines.map((line) => line.substring(12, 15));
 const getNextLines = (allLines: string[], waypoints: string[]) => {
-  return waypoints.map((waypoint) => allLines.find((line) => line.substring(0, 3) === waypoint) as string);
+  return waypoints.map((waypoint) => {
+    return allLines.find((line) => line.substring(0, 3) === waypoint) as string;
+  });
 };
 
 const main = () => {
@@ -26,7 +28,7 @@ const main = () => {
   while (allWayPointsEndInZ(currentLines) !== true) {
     const goLeft = instructions.charAt(i++ % instructions.length) === "L";
     currentLines = getNextLines(allLines, goLeft ? getLefts(currentLines) : getRights(currentLines));
-    if (i % 100000 === 0) console.log("i: ", i);
+    if (i % 1000000 === 0) console.log("iii: ", i);
   }
 
   console.log("sum: ", i);
