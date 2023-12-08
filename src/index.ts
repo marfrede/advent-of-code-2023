@@ -97,7 +97,12 @@ const main = () => {
     .map((cards, i) => ({ cards, bid: bids[i] }))
     .toSorted(compareHand)
     .map((cards) => ({ ...cards, quality: getQuality(cards) }));
-  console.log(sortedHands);
+
+  let sum = 0;
+  sortedHands.forEach((hand, i) => {
+    sum += hand.bid * (i + 1);
+  });
+  console.log("sum: ", sum);
 };
 
 main();
