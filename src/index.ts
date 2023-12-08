@@ -67,27 +67,34 @@ const isThreeOfAKindOrTwoPairs = (a: Card[]): 3 | 4 => {
  * Quality 2 - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
  * Quality 1 - High card, where all cards' labels are distinct: 23456
  */
-const getQuality = (a: Card[]): 1 | 2 | 3 | 4 | 5 | 6 | 7 => {
-  if (new Set(a).size === 1) return 7; // five of a kind
-  if (new Set(a).size === 2) return isFourOfAKindOrFullHouse(a);
-  if (new Set(a).size === 3) return isThreeOfAKindOrTwoPairs(a);
-  if (new Set(a).size === 4) return 2; // one pair exactly
-  if (new Set(a).size === 5) return 1; // high card
+const getQuality = (a: { cards: Card[] }): 1 | 2 | 3 | 4 | 5 | 6 | 7 => {
+  const cards = a.cards;
+  if (new Set(cards).size === 1) return 7; // five of a kind
+  if (new Set(cards).size === 2) return isFourOfAKindOrFullHouse(cards);
+  if (new Set(cards).size === 3) return isThreeOfAKindOrTwoPairs(cards);
+  if (new Set(cards).size === 4) return 2; // one pair exactly
+  if (new Set(cards).size === 5) return 1; // high card
   throw new Error("invalid");
 };
 
-const compareHand = (a: Card[], b: Card[]): -1 | 0 | 1 => {
-  const aQuality = getQuality(a);
-  const bQuality = getQuality(b);
+const compareHand = (a: { cards: Card[] }, b: { cards: Card[] }): -1 | 0 | 1 => {
+  const aCards = a.cards;
+  const bCards = b.cards;
+  const aQuality = getQuality({ cards: aCards });
+  const bQuality = getQuality({ cards: bCards });
   if (aQuality < bQuality) return -1;
   if (aQuality > bQuality) return 1;
-  return compareHandButOnlyValues(a, b);
+  return compareHandButOnlyValues(aCards, bCards);
 };
 
 const main = () => {
   const lines = getLines("./input.txt");
+  const bids = lines.map((line) => +line.substring(6));
   const hands = lines.map((line) => line.substring(0, 5).split("") as Card[]);
-  const sortedHands = hands.toSorted(compareHand).map((cards) => ({ cards, quality: getQuality(cards) }));
+  const sortedHands = hands
+    .map((cards, i) => ({ cards, bid: bids[i] }))
+    .toSorted(compareHand)
+    .map((cards) => ({ ...cards, quality: getQuality(cards) }));
   console.log(sortedHands);
 };
 
