@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 
-const ALL_CARDS = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"] as const;
+const ALL_CARDS = ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"] as const;
 type CardTuple = typeof ALL_CARDS; // readonly []
 type Card = CardTuple[number]; // 2 | 3 | 4 | …
 type Quality = 1 | 2 | 3 | 4 | 5 | 6 | 7;
