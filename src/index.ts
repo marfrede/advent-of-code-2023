@@ -55,7 +55,7 @@ const main = () => {
   const lines = getLines("./input.txt");
 
   const sum = lines.reduce((prevSum, line, i) => {
-    const sequence: number[] = line.split(" ").map(Number);
+    const sequence: number[] = line.split(" ").map(Number).toReversed();
     const nextElem = findNextElem(sequence);
     return prevSum + nextElem;
   }, 0);
