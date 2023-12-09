@@ -1,15 +1,5 @@
 import { readFileSync } from "fs";
-
-const NO_JOKER_CARDS = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"] as const;
-type NoJokerCardTuple = typeof NO_JOKER_CARDS; // readonly array
-type NoJokerCard = NoJokerCardTuple[number]; // 2 | 3 | 4 | …
-
-const ALL_CARDS = ["J", ...NO_JOKER_CARDS] as const;
-type CardTuple = typeof ALL_CARDS; // readonly array
-type Card = CardTuple[number]; // 2 | 3 | 4 | …
-
-type Quality = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-type Hand = { cards: Card[]; bid: number; quality: Quality };
+import { ALL_CARDS, Card, Hand, Quality } from "./card.models";
 
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
