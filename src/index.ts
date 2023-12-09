@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
-import { ALL_CARDS, Card, Hand, Quality } from "./card.models";
+import { ALL_CARDS, Card, Hand, NO_JOKER_CARDS, NoJokerCard, Quality } from "./card.models";
+import { hasNoJoker, isNoJoker } from "./no-joker.typeguard";
 
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
@@ -25,8 +26,8 @@ const compareHandButOnlyValues = (a: Card[], b: Card[]): -1 | 0 | 1 => {
 };
 
 /*
- * Quality 6 - Four of a kind, where four cards have the same label and one card has a different label: AA8AA
- * Quality 5 - Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
+ * - Quality 6 - Four of a kind, where four cards have the same label and one card has a different label: AA8AA
+ * - Quality 5 - Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
  */
 const isFourOfAKindOrFullHouse = (a: Card[]): 5 | 6 => {
   let count1 = 1;
@@ -39,8 +40,8 @@ const isFourOfAKindOrFullHouse = (a: Card[]): 5 | 6 => {
 };
 
 /*
- * Quality 4 - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
- * Quality 3 - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
+ * - Quality 4 - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
+ * - Quality 3 - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
  */
 const isThreeOfAKindOrTwoPairs = (a: Card[]): 3 | 4 => {
   const aSorted = a.toSorted(compareCard);
@@ -56,26 +57,38 @@ const isThreeOfAKindOrTwoPairs = (a: Card[]): 3 | 4 => {
 };
 
 /**
- * Quality 7 - Five of a kind, where all five cards have the same label: AAAAA
- * Quality 6 - Four of a kind, where four cards have the same label and one card has a different label: AA8AA
- * Quality 5 - Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
- * Quality 4 - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
- * Quality 3 - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
- * Quality 2 - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
- * Quality 1 - High card, where all cards' labels are distinct: 23456
+ * - Quality 7 - Five of a kind, where all five cards have the same label: AAAAA
+ * - Quality 6 - Four of a kind, where four cards have the same label and one card has a different label: AA8AA
+ * - Quality 5 - Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
+ * - Quality 4 - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
+ * - Quality 3 - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
+ * - Quality 2 - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
+ * - Quality 1 - High card, where all cards' labels are distinct: 23456
  */
-const getQualityWithoutJokers = (a: { cards: Card[] }): Quality => {
+const getQualityWithoutJokers = (a: { cards: NoJokerCard[] }): Quality | never => {
   const cards = a.cards;
-  if (new Set(cards).size === 1) return 7; // five of a kind
-  if (new Set(cards).size === 2) return isFourOfAKindOrFullHouse(cards);
-  if (new Set(cards).size === 3) return isThreeOfAKindOrTwoPairs(cards);
-  if (new Set(cards).size === 4) return 2; // one pair exactly
-  if (new Set(cards).size === 5) return 1; // high card
+  const set = new Set(cards);
+  if (set.size === 1) return 7; // five of a kind
+  if (set.size === 2) return isFourOfAKindOrFullHouse(cards);
+  if (set.size === 3) return isThreeOfAKindOrTwoPairs(cards);
+  if (set.size === 4) return 2; // one pair exactly
+  if (set.size === 5) return 1; // high card
   throw new Error("invalid");
 };
 
-const getQuality = (a: { cards: Card[] }): Quality => {
-  return getQualityWithoutJokers(a);
+const getQuality = (a: { cards: Card[] }): Quality | never => {
+  const cards = a.cards;
+  if (hasNoJoker(cards)) return getQualityWithoutJokers({ cards });
+
+  let maxQuality: 0 | Quality = 0;
+  for (const noJokerCard of NO_JOKER_CARDS) {
+    const cardsWithJokersReplaced: NoJokerCard[] = cards.map((card) => (isNoJoker(card) ? card : noJokerCard));
+    const cardsWithJokersReplacedQuality: Quality = getQualityWithoutJokers({ cards: cardsWithJokersReplaced });
+    maxQuality = Math.max(maxQuality, cardsWithJokersReplacedQuality) as Quality;
+  }
+
+  if (maxQuality === 0) throw new Error("invalid quality");
+  return maxQuality;
 };
 
 const compareHand = (a: { cards: Card[] }, b: { cards: Card[] }): -1 | 0 | 1 => {
@@ -97,10 +110,7 @@ const main = () => {
     .toSorted(compareHand)
     .map((cards) => ({ ...cards, quality: getQuality(cards) }));
 
-  let sum = 0;
-  sortedHands.forEach((hand, i) => {
-    sum += hand.bid * (i + 1);
-  });
+  const sum = sortedHands.reduce((sumSoFar, hand, i) => sumSoFar + hand.bid * (i + 1), 0);
   console.log("sum: ", sum);
 };
 
