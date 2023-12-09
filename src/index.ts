@@ -84,11 +84,15 @@ const getQualityWithoutJokers = (a: { cards: Card[] }): Quality => {
   throw new Error("invalid");
 };
 
+const getQuality = (a: { cards: Card[] }): Quality => {
+  return getQualityWithoutJokers(a);
+};
+
 const compareHand = (a: { cards: Card[] }, b: { cards: Card[] }): -1 | 0 | 1 => {
   const aCards = a.cards;
   const bCards = b.cards;
-  const aQuality = getQualityWithoutJokers({ cards: aCards });
-  const bQuality = getQualityWithoutJokers({ cards: bCards });
+  const aQuality = getQuality({ cards: aCards });
+  const bQuality = getQuality({ cards: bCards });
   if (aQuality < bQuality) return -1;
   if (aQuality > bQuality) return 1;
   return compareHandButOnlyValues(aCards, bCards);
@@ -101,7 +105,7 @@ const main = () => {
   const sortedHands: Hand[] = hands
     .map((cards, i) => ({ cards, bid: bids[i] }))
     .toSorted(compareHand)
-    .map((cards) => ({ ...cards, quality: getQualityWithoutJokers(cards) }));
+    .map((cards) => ({ ...cards, quality: getQuality(cards) }));
 
   let sum = 0;
   sortedHands.forEach((hand, i) => {
