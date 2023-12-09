@@ -6,11 +6,14 @@ const getLines = (filename: string) => {
   return lines.filter((l) => !!l);
 };
 
+const findNextElem = (sequence: number[]) => {};
+
 const main = () => {
   const lines = getLines("./input.txt");
   let sum = 0;
   lines.forEach((line) => {
-    sum += 0;
+    sum += 1;
+    const sequence: number[] = line.split(" ").map(Number);
   });
   console.log("sum: ", sum);
 };
