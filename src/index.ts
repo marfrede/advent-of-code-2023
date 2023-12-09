@@ -10,11 +10,11 @@ const findNextElem = (sequence: number[]) => {};
 
 const main = () => {
   const lines = getLines("./input.txt");
-  let sum = 0;
-  lines.forEach((line) => {
-    sum += 1;
+
+  const sum = lines.reduce((prevSum, line) => {
+    return prevSum + 1;
     const sequence: number[] = line.split(" ").map(Number);
-  });
+  }, 0);
   console.log("sum: ", sum);
 };
 
