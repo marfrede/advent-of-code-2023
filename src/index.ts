@@ -1,8 +1,11 @@
 import { readFileSync } from "fs";
 
-if (!Array.prototype.last) {
+if (!Array.prototype.last && !Array.prototype.secondLast) {
   Array.prototype.last = function () {
     return this[this.length - 1];
+  };
+  Array.prototype.secondLast = function () {
+    return this[this.length - 2];
   };
 }
 
