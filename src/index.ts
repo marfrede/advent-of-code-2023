@@ -1,8 +1,13 @@
 import { readFileSync } from "fs";
 
-const ALL_CARDS = ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"] as const;
-type CardTuple = typeof ALL_CARDS; // readonly []
+const NO_JOKER_CARDS = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"] as const;
+type NoJokerCardTuple = typeof NO_JOKER_CARDS; // readonly array
+type NoJokerCard = NoJokerCardTuple[number]; // 2 | 3 | 4 | …
+
+const ALL_CARDS = ["J", ...NO_JOKER_CARDS] as const;
+type CardTuple = typeof ALL_CARDS; // readonly array
 type Card = CardTuple[number]; // 2 | 3 | 4 | …
+
 type Quality = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 type Hand = { cards: Card[]; bid: number; quality: Quality };
 
@@ -69,7 +74,7 @@ const isThreeOfAKindOrTwoPairs = (a: Card[]): 3 | 4 => {
  * Quality 2 - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
  * Quality 1 - High card, where all cards' labels are distinct: 23456
  */
-const getQuality = (a: { cards: Card[] }): Quality => {
+const getQualityWithoutJokers = (a: { cards: Card[] }): Quality => {
   const cards = a.cards;
   if (new Set(cards).size === 1) return 7; // five of a kind
   if (new Set(cards).size === 2) return isFourOfAKindOrFullHouse(cards);
@@ -82,8 +87,8 @@ const getQuality = (a: { cards: Card[] }): Quality => {
 const compareHand = (a: { cards: Card[] }, b: { cards: Card[] }): -1 | 0 | 1 => {
   const aCards = a.cards;
   const bCards = b.cards;
-  const aQuality = getQuality({ cards: aCards });
-  const bQuality = getQuality({ cards: bCards });
+  const aQuality = getQualityWithoutJokers({ cards: aCards });
+  const bQuality = getQualityWithoutJokers({ cards: bCards });
   if (aQuality < bQuality) return -1;
   if (aQuality > bQuality) return 1;
   return compareHandButOnlyValues(aCards, bCards);
@@ -96,7 +101,7 @@ const main = () => {
   const sortedHands: Hand[] = hands
     .map((cards, i) => ({ cards, bid: bids[i] }))
     .toSorted(compareHand)
-    .map((cards) => ({ ...cards, quality: getQuality(cards) }));
+    .map((cards) => ({ ...cards, quality: getQualityWithoutJokers(cards) }));
 
   let sum = 0;
   sortedHands.forEach((hand, i) => {
