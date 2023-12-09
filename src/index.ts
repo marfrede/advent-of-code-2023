@@ -1,9 +1,15 @@
 import { readFileSync } from "fs";
 
+if (!Array.prototype.last) {
+  Array.prototype.last = function () {
+    return this[this.length - 1];
+  };
+}
+
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
   const lines = file.split("\n");
-  return lines.filter((l) => !!l);
+  return lines.filter((l: string) => !!l);
 };
 
 const findNextElem = (sequence: number[]) => {};
