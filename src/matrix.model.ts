@@ -79,6 +79,19 @@ export class Matrix {
     throw new Error("stop it");
   };
 
+  public getDirectInnerTiles(moves: Move[]) {
+    const directInnerTiles: Coord[] = [];
+    moves.forEach((move) => {
+      const { pos, didGo } = move;
+      const { above, below, left, right } = this.getSurroundings(pos);
+      if (didGo === "down" && this.notInArray(moves, right)) this.addToSet(directInnerTiles, right);
+      if (didGo === "up" && this.notInArray(moves, left)) this.addToSet(directInnerTiles, left);
+      if (didGo === "left" && this.notInArray(moves, below)) this.addToSet(directInnerTiles, below);
+      if (didGo === "right" && this.notInArray(moves, above)) this.addToSet(directInnerTiles, above);
+    });
+    return directInnerTiles;
+  }
+
   private getStartPos(): Coord {
     const y = this.lines.findIndex((line) => line.includes("S"));
     const x = this.lines[y].indexOf("S");
@@ -107,5 +120,17 @@ export class Matrix {
       return false;
     }
     return true;
+  }
+
+  private coordEquals(a: Coord, b: Coord) {
+    return a.x === b.x && a.y === b.y;
+  }
+
+  private notInArray(array: Move[], coord: Coord | undefined): boolean {
+    return !!coord && !array.find((m) => this.coordEquals(m.pos, coord));
+  }
+
+  private addToSet(set: Coord[], coord: Coord | undefined): void {
+    if (coord && !set.find((p) => this.coordEquals(p, coord))) set.push(coord);
   }
 }
