@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { Matrix, Move } from "./matrix.model";
 
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
@@ -8,11 +9,14 @@ const getLines = (filename: string) => {
 
 const main = () => {
   const lines = getLines("./input.txt");
-  let sum = 0;
-  lines.forEach((line) => {
-    sum += 0;
-  });
-  console.log("sum: ", sum);
+  const matrix: Matrix = new Matrix(lines);
+  let curMove: Move = matrix.getSecondTile();
+  let moves = 1;
+  while (matrix.get(curMove.pos) !== "S") {
+    curMove = matrix.getNextPos(curMove);
+    moves++;
+  }
+  console.log("moves to farthest: ", moves / 2);
 };
 
 main();
