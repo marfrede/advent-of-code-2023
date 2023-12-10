@@ -24,13 +24,22 @@ const createAlmanacMaps = (lines: string[]): AlmanacMap[] => {
   return maps;
 };
 
-const mapSeedToLocation = (maps: AlmanacMap[], seed: number) => {
-  let newSrc = seed;
-  for (const map of maps) {
-    newSrc = map.mapSourceToDestination(newSrc);
+const mapLocationToSeed = (maps: AlmanacMap[], destination: number) => {
+  let newDest = destination;
+  for (const map of maps.toReversed()) {
+    newDest = map.mapDestinationToSource(newDest);
   }
-  const location = newSrc;
-  return location;
+  const source = newDest;
+  return source;
+};
+
+const isSeedValid = (seedInPairs: number[], seed: number) => {
+  for (let ix = 0; ix < seedInPairs.length; ix += 2) {
+    const firstSeed = seedInPairs[ix];
+    const range = seedInPairs[ix + 1];
+    if (seed >= firstSeed && seed < firstSeed + range) return true;
+  }
+  return false;
 };
 
 const main = () => {
@@ -41,15 +50,12 @@ const main = () => {
     .split(/\s+/)
     .map(Number);
 
-  let minLocation: number | undefined = undefined;
-  for (let ix = 0; ix < seedInPairs.length; ix += 2) {
-    const firstSeed = seedInPairs[ix];
-    const range = seedInPairs[ix + 1];
-    for (let seed = firstSeed; seed < firstSeed + range; seed++) {
-      const location = mapSeedToLocation(maps, seed);
-      minLocation = minLocation === undefined || location < minLocation ? location : minLocation;
-    }
-  }
+  let minLocation: number = 40000000; // skip to 40Mio and begin searching from here
+  let seed = 0;
+  do {
+    seed = mapLocationToSeed(maps, ++minLocation);
+    if (minLocation % 1000000 === 0) console.log("minLocation: ", minLocation.toLocaleString());
+  } while (!isSeedValid(seedInPairs, seed));
 
   console.log("minLocation: ", minLocation);
 };

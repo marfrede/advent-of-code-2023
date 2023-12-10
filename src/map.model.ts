@@ -10,14 +10,14 @@ export class AlmanacMap {
     this.mappings = lines.slice(1).map((line) => line.split(/\s+/).map(Number));
   }
 
-  public mapSourceToDestination(source: number): number {
+  public mapDestinationToSource(destination: number): number {
     for (const mapping of this.mappings) {
       const [dest, src, range] = mapping;
-      if (source >= src && source < src + range) {
-        const diff = source - src;
-        return dest + diff;
+      if (destination >= dest && destination <= dest + range) {
+        const source = destination + (src - dest);
+        return source;
       }
     }
-    return source;
+    return destination;
   }
 }
