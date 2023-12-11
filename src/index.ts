@@ -45,10 +45,10 @@ const calcDistance = (aGal: Coord, bGal: Coord) => {
   const distNoExpansion = maxX - minX + (maxY - minY);
   let dist = distNoExpansion;
   for (const xWithout of xsWithoutGalaxy) {
-    if (minX < xWithout && maxX > xWithout) dist = dist + 1;
+    if (minX < xWithout && maxX > xWithout) dist = dist + (1000000 - 1);
   }
   for (const yWithout of ysWithoutGalaxy) {
-    if (minY < yWithout && maxY > yWithout) dist = dist + 1;
+    if (minY < yWithout && maxY > yWithout) dist = dist + (1000000 - 1);
   }
   return dist;
 };
