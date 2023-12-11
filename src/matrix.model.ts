@@ -79,17 +79,43 @@ export class Matrix {
     throw new Error("stop it");
   };
 
-  public getDirectInnerTiles(moves: Move[]) {
+  private getDirectInnerTiles(moves: Move[]) {
     const directInnerTiles: Coord[] = [];
     moves.forEach((move) => {
       const { pos, didGo } = move;
       const { above, below, left, right } = this.getSurroundings(pos);
-      if (didGo === "down" && this.notInArray(moves, right)) this.addToSet(directInnerTiles, right);
-      if (didGo === "up" && this.notInArray(moves, left)) this.addToSet(directInnerTiles, left);
-      if (didGo === "left" && this.notInArray(moves, below)) this.addToSet(directInnerTiles, below);
-      if (didGo === "right" && this.notInArray(moves, above)) this.addToSet(directInnerTiles, above);
+      // round to the left
+      // if (didGo === "down" && this.notInArray(moves, right)) this.addToSet(directInnerTiles, right);
+      // if (didGo === "up" && this.notInArray(moves, left)) this.addToSet(directInnerTiles, left);
+      // if (didGo === "left" && this.notInArray(moves, below)) this.addToSet(directInnerTiles, below);
+      // if (didGo === "right" && this.notInArray(moves, above)) this.addToSet(directInnerTiles, above);
+      // round to the right
+      if (didGo === "up" && this.notInArray(moves, right)) this.addToSet(directInnerTiles, right);
+      if (didGo === "down" && this.notInArray(moves, left)) this.addToSet(directInnerTiles, left);
+      if (didGo === "right" && this.notInArray(moves, below)) this.addToSet(directInnerTiles, below);
+      if (didGo === "left" && this.notInArray(moves, above)) this.addToSet(directInnerTiles, above);
     });
     return directInnerTiles;
+  }
+
+  public findAllInnerTiles(moves: Move[]) {
+    const waypoints: Coord[] = moves.map((m) => m.pos);
+    const directInnerTiles = this.getDirectInnerTiles(moves);
+    console.log("directInnerTiles: ", directInnerTiles);
+    const innerTiles: Coord[] = [...directInnerTiles];
+    while (true) {
+      const len = innerTiles.length;
+      innerTiles.forEach((inner: Coord) => {
+        const surroundings = this.getSurroundings(inner);
+        Object.values(surroundings).forEach((surrounding: Coord) => {
+          if (this.notInSet(waypoints, surrounding)) this.addToSet(innerTiles, surrounding);
+        });
+      });
+      if (innerTiles.length === len) {
+        break;
+      }
+    }
+    return innerTiles;
   }
 
   private getStartPos(): Coord {
@@ -128,6 +154,10 @@ export class Matrix {
 
   private notInArray(array: Move[], coord: Coord | undefined): boolean {
     return !!coord && !array.find((m) => this.coordEquals(m.pos, coord));
+  }
+
+  private notInSet(set: Coord[], coord: Coord | undefined): boolean {
+    return !!coord && !set.find((c) => this.coordEquals(c, coord));
   }
 
   private addToSet(set: Coord[], coord: Coord | undefined): void {
