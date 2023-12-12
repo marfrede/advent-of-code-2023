@@ -43,16 +43,27 @@ const getNumberOfDifferentMatches = (springs: string, numbers: number[]): number
   const unknownIndexes: number[] = getQuestionMarkIndexes(springs);
   const allDots = springs.replaceAll("?", ".");
   springs = allDots;
+  let increms = 0;
   do {
     springs = incrementUnknownSprings(springs, unknownIndexes);
+    if (++increms % 100000 === 0) console.log("increms: ", increms);
     if (numbersMatchSprings(springs, numbers)) matches++;
   } while (springs !== allDots);
   return matches;
 };
 
+const unfoldLines = (line: string): string => {
+  const springs = line.substring(0, line.indexOf(" "));
+  const numbers = line.substring(line.indexOf(" ") + 1);
+  return `${springs}?${springs}?${springs}?${springs}?${springs} ${numbers},${numbers},${numbers},${numbers},${numbers}`;
+};
+
 const main = () => {
   const lines = getLines("./input.txt");
-  const sum = lines.reduce((prevSum, line) => {
+  const sum = lines.reduce((prevSum, lineRaw) => {
+    console.log("prevSum: ", prevSum);
+    const line = unfoldLines(lineRaw);
+    console.log("line: ", line);
     const numbers: number[] = line
       .substring(line.indexOf(" ") + 1)
       .split(",")
