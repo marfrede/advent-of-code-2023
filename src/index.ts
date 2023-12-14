@@ -8,10 +8,9 @@ const getLines = (filename: string) => {
 
 const main = () => {
   const lines = getLines("./input.txt");
-  let sum = 0;
-  lines.forEach((line) => {
-    sum += 0;
-  });
+  const sum = lines.reduce((prevSum, line, i) => {
+    return prevSum + 1;
+  }, 0);
   console.log("sum: ", sum);
 };
 
