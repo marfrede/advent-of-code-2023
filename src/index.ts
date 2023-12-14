@@ -1,7 +1,5 @@
 import { readFileSync } from "fs";
 
-let COL_LEN: number;
-
 const getLines = (filename: string) => {
   const file = readFileSync(filename, "utf-8");
   const lines = file.split("\n");
@@ -21,28 +19,37 @@ const convertToColumns = (lines: string[]) => {
   return columns;
 };
 
-const getValueOfCol = (col: string) => {
-  const splittedAfterRocks = (col.match(/[^#]+#?|#/g) || []).map((s) => s ?? "");
-  let value = 0;
-  let indexPointsLeft = COL_LEN;
-  for (const lineBeforeRock of splittedAfterRocks) {
-    if (lineBeforeRock.includes("O")) {
-      const numberOfOs = (lineBeforeRock.match(/O/g) || []).length;
-      for (let i = 0; i < numberOfOs; i++) {
-        value += indexPointsLeft - i;
-      }
-    }
-    indexPointsLeft = indexPointsLeft - lineBeforeRock.length;
-  }
-  return value;
+const reverseString = (s: string): string => s.split("").reverse().join("");
+
+const rollNorth = (col: string): string => {
+  let newCol = "";
+  const splittedBetweenRocks = col.split("#");
+  splittedBetweenRocks.forEach((beforeRockStr, i) => {
+    const numberOfOs = (beforeRockStr.match(/O/g) || []).length;
+    const numberOfDots = (beforeRockStr.match(/\./g) || []).length;
+    newCol += (i > 0 ? "#" : "") + "O".repeat(numberOfOs) + ".".repeat(numberOfDots);
+  });
+  return newCol;
 };
 
-const main = () => {
-  const lines: string[] = getLines("./input.txt");
-  const columns: string[] = convertToColumns(lines);
-  COL_LEN = columns[0].length;
+const makeOneCycle = (lines: string[]): string[] => {
+  let columns: string[] = lines;
+  columns = convertToColumns(columns).map((col) => rollNorth(col)); // roll north
+  columns = convertToColumns(columns).map((col) => rollNorth(col)); // roll west
+  columns = convertToColumns(columns).map((col) => reverseString(rollNorth(reverseString(col)))); // roll south
+  columns = convertToColumns(columns).map((col) => reverseString(rollNorth(reverseString(col)))); // roll east
+  return columns;
+};
 
-  const sum = columns.reduce((prevSum, col) => prevSum + getValueOfCol(col), 0);
+const countLoadOnNorth = (lines: string[]): number =>
+  lines.reduce((prev, line, i) => prev + (line.match(/O/g) || []).length * (lines.length - i), 0);
+
+const main = () => {
+  const LINES: string[] = getLines("./input.txt");
+  const numberOfCycles = 1000; // to be honest I don´t know why this is the same as 1000000000
+  let lines = LINES;
+  for (let i = 0; i < numberOfCycles; i++) lines = makeOneCycle(lines);
+  const sum = countLoadOnNorth(lines);
   console.log("sum: ", sum);
 };
 
