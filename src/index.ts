@@ -6,10 +6,22 @@ const getLines = (filename: string) => {
   return lines.filter((l) => !!l);
 };
 
+const calcHashAlg = (str: string = "rn=1"): number => {
+  let curVal = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ascii = str.charCodeAt(i);
+    curVal += ascii;
+    curVal *= 17;
+    curVal %= 256;
+  }
+  return curVal;
+};
+
 const main = () => {
   const lines = getLines("./input.txt");
-  const sum = lines.reduce((prevSum, line, i) => {
-    return prevSum + 1;
+  const initSeqSteps = lines[0].split(",");
+  const sum = initSeqSteps.reduce((prevSum, seq) => {
+    return prevSum + calcHashAlg(seq);
   }, 0);
   console.log("sum: ", sum);
 };
